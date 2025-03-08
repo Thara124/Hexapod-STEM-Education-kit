@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arduino Code Display</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent-color: #2575fc; /* Same color used for "Back to Main Page" */
+      --hover-color: #f57c00;
+      --toolbar-bg: linear-gradient(90deg, #673ab7, #2575fc);
+      --code-bg: #fff;
+      --code-border: #ddd;
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f0f4ff;
+      color: #333;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      background: var(--toolbar-bg);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .toolbar a {
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: color 0.3s;
+    }
+    .toolbar a:hover {
+      color: var(--hover-color);
+    }
+
+    /* Code container */
+    .code-container {
+      margin: 20px auto;
+      max-width: 800px;
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 8px;
+      padding: 20px;
+      overflow: auto;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: var(--shadow);
+      max-height: calc(100vh - 80px);
+      /* Additional margin for the code text */
+    }
+    .code-container:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    /* Title above the code */
+    .code-title {
+      color: var(--accent-color);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Back to Home button */
+    .back-button {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: var(--accent-color);
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+    .back-button:hover {
+      color: var(--hover-color);
+    }
+  </style>
+</head>
+<body>
+  <!-- Toolbar with Home button -->
+  <div class="toolbar">
+    <a href="index.html">Home</a>
+  </div>
+
+  <!-- Code Display Area -->
+  <div class="code-container">
+    <!-- Title in blue color (accent color) -->
+    <h2 class="code-title">ESP32-CAM code for Hexapod</h2>
+
+    <pre><code>{
+        // Arduino Code
+
+        #include <Wire.h>
+            #include <Adafruit_PWMServoDriver.h>
+            #include "BluetoothSerial.h"
+            #include <WiFi.h>
+            #include <ArduinoOTA.h>
+            
+            const char* ssid = "Galaxy M34 5G";
+            const char* password = "nopassword";
+            
+            Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x40);
+            Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x41);
+            BluetoothSerial SerialBT;
+            
+            #define SERVOMIN 150
+            #define SERVOMAX 600
+            #define SDA_PIN 14
+            #define SCL_PIN 15
+            
+            struct LegServo {
+              Adafruit_PWMServoDriver* board;
+              uint8_t channel;
+            };
+            
+            LegServo legServos[6][3] = {
+              { { &pwm1, 0 }, { &pwm1, 1 }, { &pwm1, 2 } },
+              { { &pwm1, 3 }, { &pwm1, 4 }, { &pwm1, 5 } },
+              { { &pwm1, 6 }, { &pwm1, 7 }, { &pwm1, 8 } },
+              { { &pwm2, 0 }, { &pwm2, 1 }, { &pwm2, 2 } },
+              { { &pwm2, 3 }, { &pwm2, 4 }, { &pwm2, 5 } },
+              { { &pwm2, 6 }, { &pwm2, 7 }, { &pwm2, 8 } }
+            };
+            
+            void setServoAngle(uint8_t leg, uint8_t joint, float angle) {
+              if (angle < 0) angle = 0;
+              if (angle > 180) angle = 180;
+              uint16_t pulse = map(angle, 0, 180, SERVOMIN, SERVOMAX);
+              legServos[leg][joint].board->setPWM(legServos[leg][joint].channel, 0, pulse);
+            }
+            
+            void setAllServos(float angle, float angle2) {
+              for (uint8_t leg = 0; leg < 6; leg++) {
+                for (uint8_t joint = 0; joint < 3; joint++) {
+                  setServoAngle(leg, joint, angle);
+                  if (joint == 2)
+                    setServoAngle(leg, joint, angle2);
+                }
+              }
+            }
+            
+            void setup() {
+              Serial.begin(115200);
+              SerialBT.begin("Hexapod_BT");
+              Wire.begin(SDA_PIN, SCL_PIN);
+            
+              pwm1.begin();
+              pwm2.begin();
+              pwm1.setPWMFreq(50);
+              pwm2.setPWMFreq(50);
+              delay(10);
+            
+              // Set servos to neutral (initial setup position)
+              setAllServos(90, 130);
+              SerialBT.println("Hexapod Ready");
+            
+              // WiFi initialization
+              WiFi.begin(ssid, password);
+              while (WiFi.status() != WL_CONNECTED) {
+                delay(500);
+                Serial.print(".");
+              }
+              Serial.println("\nWiFi connected");
+              Serial.print("IP Address: ");
+              Serial.println(WiFi.localIP());
+            
+              // OTA setup
+              ArduinoOTA.setHostname("ESP32_OTA_Device");
+              ArduinoOTA.onStart([]() {
+                Serial.println("Start updating...");
+              });
+              ArduinoOTA.onEnd([]() {
+                Serial.println("\nUpdate finished!");
+              });
+              ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+                Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+              });
+              ArduinoOTA.onError([](ota_error_t error) {
+                Serial.printf("Error[%u]: ", error);
+                if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+                else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+                else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+                else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+                else if (error == OTA_END_ERROR) Serial.println("End Failed");
+              });
+              ArduinoOTA.begin();
+              Serial.println("OTA Ready");
+            }
+            
+            void loop() {
+              ArduinoOTA.handle();
+              // Remain idle in initial setup.
+            }
+            
+}
+    </code></pre>
+
+    <a class="back-button" href="index.html">Back to Main Page</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>ESP32-CAM code for Hexapod </title>
+  <style>
+    body {
+      background: #f0f4ff;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #2575fc;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+    pre {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 20px;
+      overflow: auto;
+      line-height: 1.4;
+      /* We use monospace for code */
+      font-family: "Courier New", Courier, monospace;
+      font-size: 14px;
+      max-height: 80vh; /* so it doesn't overflow the screen too much */
+    }
+    /* Simple classes for different token types */
+    .cComment  { color: #008000;               } /* green for comments */
+    .cDirective{ color: #0000ff; font-weight:bold; } /* blue for #includes, #defines */
+    .cKeyword  { color: #7f0055; font-weight:bold; } /* purple for keywords */
+    .cString   { color: #a31515;               } /* reddish for strings */
+    .cNumber   { color: #09885A;               } /* greenish for numeric constants */
+    .cType     { color: #2b91af; font-weight:bold; } /* teal for types */
+    /* Additional styling as you prefer... */
+    a {
+      text-decoration: none;
+      color: #2575fc;
+      font-weight: 600;
+    }
+    a:hover {
+      color: #f57c00;
+    }
+  </style>
+</head>
+<body>
+  <h1>ESP32-CAM code for Hexapod </h1>
+  
+  <pre>
+<span class="cComment">// Arduino Code</span>
+
+<span class="cDirective">#include</span> <span class="cString">&lt;Wire.h&gt;</span>
+<span class="cDirective">#include</span> <span class="cString">&lt;Adafruit_PWMServoDriver.h&gt;</span>
+<span class="cDirective">#include</span> <span class="cString">&quot;BluetoothSerial.h&quot;</span>
+<span class="cDirective">#include</span> <span class="cString">&lt;WiFi.h&gt;</span>
+<span class="cDirective">#include</span> <span class="cString">&lt;ArduinoOTA.h&gt;</span>
+
+<span class="cComment">// Replace with your WiFi credentials</span>
+<span class="cKeyword">const</span> <span class="cKeyword">char</span>* ssid = <span class="cString">&quot;Galaxy M34 5G&quot;</span>;
+<span class="cKeyword">const</span> <span class="cKeyword">char</span>* password = <span class="cString">&quot;nopassword&quot;</span>;
+
+<span class="cType">Adafruit_PWMServoDriver</span> pwm1 = <span class="cType">Adafruit_PWMServoDriver</span>(<span class="cNumber">0x40</span>);
+<span class="cType">Adafruit_PWMServoDriver</span> pwm2 = <span class="cType">Adafruit_PWMServoDriver</span>(<span class="cNumber">0x41</span>);
+<span class="cType">BluetoothSerial</span> SerialBT;
+
+<span class="cDirective">#define</span> SERVOMIN <span class="cNumber">150</span>
+<span class="cDirective">#define</span> SERVOMAX <span class="cNumber">600</span>
+<span class="cDirective">#define</span> SDA_PIN <span class="cNumber">14</span>
+<span class="cDirective">#define</span> SCL_PIN <span class="cNumber">15</span>
+
+<span class="cKeyword">bool</span> stopCommand = <span class="cKeyword">false</span>;
+
+<span class="cComment">// Example of a struct</span>
+<span class="cKeyword">struct</span> LegServo {
+  <span class="cType">Adafruit_PWMServoDriver</span>* board;
+  <span class="cType">uint8_t</span> channel;
+};
+
+LegServo legServos[<span class="cNumber">6</span>][<span class="cNumber">3</span>] = {
+  { { &pwm1, <span class="cNumber">0</span> }, { &pwm1, <span class="cNumber">1</span> }, { &pwm1, <span class="cNumber">2</span> } },
+  { { &pwm1, <span class="cNumber">3</span> }, { &pwm1, <span class="cNumber">4</span> }, { &pwm1, <span class="cNumber">5</span> } },
+  { { &pwm1, <span class="cNumber">6</span> }, { &pwm1, <span class="cNumber">7</span> }, { &pwm1, <span class="cNumber">8</span> } },
+  { { &pwm2, <span class="cNumber">0</span> }, { &pwm2, <span class="cNumber">1</span> }, { &pwm2, <span class="cNumber">2</span> } },
+  { { &pwm2, <span class="cNumber">3</span> }, { &pwm2, <span class="cNumber">4</span> }, { &pwm2, <span class="cNumber">5</span> } },
+  { { &pwm2, <span class="cNumber">6</span> }, { &pwm2, <span class="cNumber">7</span> }, { &pwm2, <span class="cNumber">8</span> } }
+};
+
+<span class="cKeyword">void</span> setServoAngle(<span class="cType">uint8_t</span> leg, <span class="cType">uint8_t</span> joint, <span class="cKeyword">float</span> angle) {
+  <span class="cKeyword">if</span> (angle &lt; <span class="cNumber">0</span>) angle = <span class="cNumber">0</span>;
+  <span class="cKeyword">if</span> (angle &gt; <span class="cNumber">180</span>) angle = <span class="cNumber">180</span>;
+  <span class="cType">uint16_t</span> pulse = map(angle, <span class="cNumber">0</span>, <span class="cNumber">180</span>, SERVOMIN, SERVOMAX);
+  legServos[leg][joint].board-&gt;setPWM(legServos[leg][joint].channel, <span class="cNumber">0</span>, pulse);
+}
+
+<span class="cKeyword">void</span> setAllServos(<span class="cKeyword">float</span> angle, <span class="cKeyword">float</span> angle2) {
+  <span class="cKeyword">for</span> (<span class="cType">uint8_t</span> leg = <span class="cNumber">0</span>; leg &lt; <span class="cNumber">6</span>; leg++) {
+    <span class="cKeyword">for</span> (<span class="cType">uint8_t</span> joint = <span class="cNumber">0</span>; joint &lt; <span class="cNumber">3</span>; joint++) {
+      setServoAngle(leg, joint, angle);
+      <span class="cKeyword">if</span> (joint == <span class="cNumber">2</span>)
+        setServoAngle(leg, joint, angle2);
+    }
+  }
+}
+
+<span class="cComment">// You can fill in your movement functions below...</span>
+<span class="cKeyword">void</span> initial_forward() {
+  // ...
+}
+
+<span class="cKeyword">void</span> initial_backward() {
+  // ...
+}
+
+<span class="cKeyword">void</span> initial_right() {
+  // ...
+}
+
+<span class="cKeyword">void</span> initial_left() {
+  // ...
+}
+
+<span class="cKeyword">void</span> moveForward() {
+  // ...
+}
+
+<span class="cKeyword">void</span> moveBackward() {
+  // ...
+}
+
+<span class="cKeyword">void</span> moveLeft() {
+  // ...
+}
+
+<span class="cKeyword">void</span> moveRight() {
+  // ...
+}
+
+<span class="cKeyword">void</span> processCommand(<span class="cType">int</span> command) {
+  <span class="cKeyword">if</span> (command == <span class="cNumber">0</span>) {
+    moveForward();
+  } <span class="cKeyword">else if</span> (command == <span class="cNumber">1</span>) {
+    moveBackward();
+  } <span class="cKeyword">else if</span> (command == <span class="cNumber">3</span>) {
+    moveLeft();
+  } <span class="cKeyword">else if</span> (command == <span class="cNumber">2</span>) {
+    moveRight();
+  } <span class="cKeyword">else if</span> (command == <span class="cNumber">9</span>) {
+    stop();
+  } <span class="cKeyword">else</span> {
+    SerialBT.println(<span class="cString">"Invalid Command"</span>);
+  }
+}
+
+<span class="cKeyword">void</span> stop() {
+  <span class="cKeyword">while</span> (<span class="cNumber">1</span>) {
+    <span class="cKeyword">if</span> (SerialBT.available()) {
+      String com = SerialBT.readStringUntil(<span class="cString">'\n'</span>);
+      <span class="cType">int</span> command = com.toInt();
+      <span class="cKeyword">if</span>(command) {
+        <span class="cKeyword">break</span>;
+      }
+    }
+  }
+}
+
+<span class="cKeyword">void</span> setup() {
+  Serial

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Full Screen Layout</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --toolbar-bg: linear-gradient(90deg, #673ab7, #2575fc);
+      --sidebar-bg: #ffffff;
+      --workspace-bg: #f5f8fd;
+      --panel-bg: #ffffff;
+      --text-color: #333333;
+      --accent-color: #2575fc;
+      --hover-color: #f57c00;
+      --shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+      --red-color: #f44336;
+      --red-border: #d32f2f;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    /* Layout:
+       Row 1 (60px): Toolbar.
+       Row 2 (1fr): Main content in 3 columns:
+         Left (400px), Drag & Drop (1fr) and Simulation (1fr)
+    */
+    body {
+      display: grid;
+      grid-template-rows: 60px 1fr;
+      grid-template-columns: 400px 1fr 1fr;
+      height: 100vh;
+      background-color: var(--workspace-bg);
+      color: var(--text-color);
+      overflow: hidden; /* no scrolling */
+    }
+    /**********************************
+     * TOOLBAR (Row 1)
+     **********************************/
+    .toolbar {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      background: var(--toolbar-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .toolbar .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+    .toolbar .nav-links a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .toolbar button {
+      padding: 6px 12px;
+      background: #fff;
+      border: none;
+      color: var(--accent-color);
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s, color 0.3s;
+    }
+    .toolbar button:hover {
+      background: var(--hover-color);
+      color: #fff;
+    }
+    /**********************************
+     * LEFT COLUMN (Row 2, Col 1)
+     * Using flex to space two sections:
+     * - .blocks-container (top): contains the 9 blocks
+     * - .camera-section (bottom): contains Camera View title, Camera Box and CODE button
+     **********************************/
+    .left-col {
+      grid-row: 2;
+      grid-column: 1;
+      background-color: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8px;
+      border-right: 1px solid #e0e0e0;
+      overflow: hidden;
+    }
+    /* Top section: nine blocks.
+       Increase margin-top to push the blocks further down from the toolbar.
+    */
+    .blocks-container {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+    /* Puzzle block style */
+    .block {
+      position: relative;
+      width: 150px;
+      height: 28px;
+      line-height: 28px;
+      margin: 0 auto 4px;
+      text-align: center;
+      font-weight: 600;
+      cursor: move;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      background-color: #ffca28;
+      color: #333;
+    }
+    .block::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: calc(50% - 8px);
+      width: 16px;
+      height: 16px;
+      background: inherit;
+      border-radius: 50%;
+    }
+    .block::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: calc(50% - 8px);
+      width: 16px;
+      height: 16px;
+      background: var(--workspace-bg);
+      border-radius: 50%;
+      box-shadow: 0 0 0 8px inherit;
+    }
+    /* Bottom section: Camera View and CODE button */
+    .camera-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 8px;
+      padding-top: 8px;
+    }
+    .block-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--accent-color);
+      text-align: center;
+    }
+    /* Camera Box with strict 16:9 ratio */
+    .camera-box {
+      width: 100%;
+      max-width: 380px;
+      aspect-ratio: 16 / 9;
+      background: #fff;
+      border: 2px solid #d0e2ff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .camera-box:hover {
+      background: #f0f4ff;
+    }
+    .code-button {
+      width: 150px;
+      background: var(--red-color);
+      border: 1px solid var(--red-border);
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 600;
+      color: #fff;
+      padding: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .code-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .code-button span {
+      margin-right: 4px;
+    }
+    /**********************************
+     * CENTER COLUMN (Row 2, Col 2) - Drag & Drop area
+     **********************************/
+    .center-col {
+      grid-row: 2;
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .drag-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--accent-color);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .workspace-area {
+      flex: 1;
+      width: 100%;
+      background: #fff;
+      border: 2px solid #e2e2e2;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      overflow-y: auto;
+      transition: background 0.3s;
+    }
+    .workspace-area:hover {
+      background: #f0f4ff;
+    }
+    .workspace-area .block + .block {
+      margin-top: -12px;
+    }
+    .workspace-area .block {
+      cursor: default;
+    }
+    /**********************************
+     * RIGHT COLUMN (Row 2, Col 3) - Simulation area
+     **********************************/
+    .simulation-col {
+      grid-row: 2;
+      grid-column: 3;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      background-color: var(--panel-bg);
+      border-left: 1px solid #e0e0e0;
+      overflow-y: auto;
+    }
+    .panel-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--accent-color);
+      margin-bottom: 0.8rem;
+      text-align: center;
+    }
+    .preview-window {
+      flex: 1;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s, background 0.3s;
+    }
+    .preview-window:hover {
+      transform: translateY(-2px);
+      background: #f8faff;
+    }
+    /**********************************
+     * STEPS Block Controls
+     **********************************/
+    .interactive-block {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .interactive-block span {
+      font-size: 10px;
+      margin-right: 4px;
+    }
+    .interactive-block button {
+      padding: 2px 6px;
+      background-color: var(--accent-color);
+      border: none;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      transition: background 0.3s;
+    }
+    .interactive-block button:hover {
+      background-color: var(--hover-color);
+    }
+    .interactive-block input {
+      width: 28px;
+      text-align: center;
+      padding: 2px;
+      border: 1px solid #cccccc;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+    /* Custom Context Menu styling */
+    #context-menu {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    #context-menu ul {
+      list-style: none;
+      padding: 4px 0;
+      margin: 0;
+    }
+    #context-menu li {
+      padding: 6px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #context-menu li:hover {
+      background: var(--hover-color);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="left-section">
+      <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#concepts">Concepts</a>
+      </div>
+    </div>
+    <div class="right-section">
+      <button id="run">Run</button>
+      <button id="refresh">REFRESH</button>
+    </div>
+  </div>
+  <!-- LEFT COLUMN -->
+  <div class="left-col">
+    <!-- Top section: nine blocks -->
+    <div class="blocks-container">
+      <div class="block start" draggable="true">START</div>
+      <div class="block stop" draggable="true">STOP</div>
+      <div class="block forward" draggable="true">FORWARD</div>
+      <div class="block backward" draggable="true">BACKWARD</div>
+      <div class="block left" draggable="true">LEFT</div>
+      <div class="block right" draggable="true">RIGHT</div>
+      <div class="block camera-on" draggable="true">CAMERA ON</div>
+      <div class="block height" draggable="true">HEIGHT</div>
+      <div class="block steps" draggable="true">
+        <div class="interactive-block">
+          <span>STEPS</span>
+          <button type="button" onclick="decrementSteps(event)">-</button>
+          <input type="number" value="0" min="0" />
+          <button type="button" onclick="incrementSteps(event)">+</button>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom section: Camera View and CODE button -->
+    <div class="camera-section">
+      <div class="block-title">Camera View</div>
+      <div class="camera-box" id="cameraArea"></div>
+      <button class="code-button" onclick="window.location.href='code.html';">
+        <span>▶</span>CODE
+      </button>
+    </div>
+  </div>
+  <!-- CENTER COLUMN (Drag & Drop) -->
+  <div class="center-col">
+    <div class="drag-title">Drag And Drop</div>
+    <div class="workspace-area" id="dragArea">
+      <!-- Dropped blocks appear here -->
+    </div>
+  </div>
+  <!-- RIGHT COLUMN (Simulation) -->
+  <div class="simulation-col">
+    <div class="panel-title">SIMULATION</div>
+    <div class="preview-window" id="simulationWindow"></div>
+  </div>
+  <!-- Custom Context Menu -->
+  <div id="context-menu">
+    <ul>
+      <li id="context-view">View</li>
+    </ul>
+  </div>
+  <script>
+    // Variable to store the currently right-clicked block
+    let currentBlock = null;
+    // Attach dragstart and contextmenu events for all blocks in the blocks-container
+    document.querySelectorAll(".blocks-container .block").forEach((block) => {
+      block.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/html", block.outerHTML);
+        block.classList.add("dragging");
+      });
+      block.addEventListener("dragend", () => {
+        block.classList.remove("dragging");
+      });
+      // Right-click event to show custom context menu
+      block.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        currentBlock = block;
+        const menu = document.getElementById("context-menu");
+        menu.style.top = e.pageY + "px";
+        menu.style.left = e.pageX + "px";
+        menu.style.display = "block";
+      });
+    });
+    // Hide context menu when clicking anywhere else
+    document.addEventListener("click", () => {
+      document.getElementById("context-menu").style.display = "none";
+    });
+    // When "View" is clicked, redirect to the individual page based on block type
+    document.getElementById("context-view").addEventListener("click", () => {
+      const mapping = {
+        "start": "start.html",
+        "stop": "stop.html",
+        "forward": "forward.html",
+        "backward": "backward.html",
+        "left": "left.html",
+        "right": "right.html",
+        "camera-on": "camera.html",
+        "height": "height.html",
+        "steps": "steps.html"
+      };
+      for (let key in mapping) {
+        if (currentBlock.classList.contains(key)) {
+          window.location.href = mapping[key];
+          break;
+        }
+      }
+    });
+    // Drag & drop for workspace area
+    const workspace = document.getElementById("dragArea");
+    workspace.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+    workspace.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const data = e.dataTransfer.getData("text/html");
+      if (data) {
+        const tempContainer = document.createElement("div");
+        tempContainer.innerHTML = data;
+        const newBlock = tempContainer.firstElementChild;
+        if (newBlock) {
+          newBlock.removeAttribute("draggable");
+          newBlock.classList.remove("dragging");
+          workspace.appendChild(newBlock);
+        }
+      }
+    });
+    // STEPS block controls
+    function incrementSteps(event) {
+      const block = event.target.closest('.block');
+      if (block) {
+        const input = block.querySelector('input[type="number"]');
+        if (input) input.value = parseInt(input.value) + 1;
+      }
+    }
+    function decrementSteps(event) {
+      const block = event.target.closest('.block');
+      if (block) {
+        const input = block.querySelector('input[type="number"]');
+        if (input && parseInt(input.value) > 0) {
+          input.value = parseInt(input.value) - 1;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
