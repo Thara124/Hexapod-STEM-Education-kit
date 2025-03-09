@@ -18,14 +18,12 @@
       --red-color: #f44336;
       --red-border: #d32f2f;
     }
-
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
-
     /* Layout:
        Row 1 (60px): Toolbar.
        Row 2 (1fr): Main content in 3 columns:
@@ -42,7 +40,6 @@
       color: var(--text-color);
       overflow: hidden;
     }
-
     /**********************************
      * TOOLBAR (Row 1)
      **********************************/
@@ -81,7 +78,6 @@
       background: var(--hover-color);
       color: #fff;
     }
-
     /**********************************
      * LEFT COLUMN (Row 2, Col 1)
      **********************************/
@@ -192,7 +188,6 @@
     .code-button span {
       margin-right: 4px;
     }
-
     /**********************************
      * CENTER COLUMN (Row 2, Col 2) - Drag & Drop area
      **********************************/
@@ -235,7 +230,6 @@
     .workspace-area .block {
       cursor: default;
     }
-
     /**********************************
      * RIGHT COLUMN (Row 2, Col 3) - Simulation area
      **********************************/
@@ -262,22 +256,22 @@
       border-radius: 8px;
       box-shadow: var(--shadow);
       display: block;
-      overflow: auto; /* enables scrollbars if needed */
+      overflow-y: auto;
+      overflow-x: hidden; /* remove horizontal scrollbar */
       transition: transform 0.3s, background 0.3s;
     }
     .preview-window:hover {
       transform: translateY(-2px);
       background: #f8faff;
     }
-    /* Scale the embedded app horizontally (only width scaled to 60%) */
+    /* Scale the embedded app horizontally to 60% of its natural width */
     .preview-window iframe {
-      width: 1200px;  /* Natural width of your app */
+      width: 1200px;  /* Natural width */
       height: 900px;  /* Natural height remains unchanged */
       border: none;
-      transform: scale(0.50, 0.47); /* 60% horizontal scale, vertical unchanged */
+      transform: scale(0.60, 1); /* 60% horizontal scale, 100% vertical */
       transform-origin: top left;
     }
-
     /**********************************
      * STEPS Block Controls
      **********************************/
@@ -312,7 +306,6 @@
       border-radius: 4px;
       font-size: 10px;
     }
-
     /* Custom Context Menu styling */
     #context-menu {
       position: absolute;
@@ -353,7 +346,6 @@
       <button id="refresh">REFRESH</button>
     </div>
   </div>
-
   <!-- LEFT COLUMN -->
   <div class="left-col">
     <!-- Blocks Container: Nine Puzzle Blocks -->
