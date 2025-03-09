@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Full Screen Layout</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --toolbar-bg: linear-gradient(90deg, #673ab7, #2575fc);
@@ -29,21 +26,26 @@
       font-family: 'Poppins', sans-serif;
     }
 
-    /* 
-       UPDATED: 
-       - Originally: grid-template-columns: 400px 1fr 1fr;
-       - Now:        grid-template-columns: 400px 0.6667fr 1.3333fr;
+    /* Layout:
+       Row 1 (60px): Toolbar.
+       Row 2 (1fr): Main content in 3 columns:
+         Left: 400px,
+         Center (Drag & Drop): 0.6667fr,
+         Right (Simulation): 1.3333fr.
     */
     body {
       display: grid;
       grid-template-rows: 60px 1fr;
-      grid-template-columns: 400px 0.6667fr 1.3333fr; /* Adjusted ratio */
+      grid-template-columns: 400px 0.6667fr 1.3333fr;
       height: 100vh;
       background-color: var(--workspace-bg);
       color: var(--text-color);
-      overflow: hidden; /* no scrolling */
+      overflow: hidden;
     }
 
+    /**********************************
+     * TOOLBAR (Row 1)
+     **********************************/
     .toolbar {
       grid-column: 1 / -1;
       grid-row: 1;
@@ -80,7 +82,12 @@
       color: #fff;
     }
 
-    /* LEFT COLUMN */
+    /**********************************
+     * LEFT COLUMN (Row 2, Col 1)
+     * Contains two sections:
+     * - .blocks-container: the 9 draggable blocks (pushed down a bit)
+     * - .camera-section: Camera View title, camera box, and CODE button.
+     **********************************/
     .left-col {
       grid-row: 2;
       grid-column: 1;
@@ -189,7 +196,9 @@
       margin-right: 4px;
     }
 
-    /* CENTER COLUMN */
+    /**********************************
+     * CENTER COLUMN (Row 2, Col 2) - Drag & Drop area
+     **********************************/
     .center-col {
       grid-row: 2;
       grid-column: 2;
@@ -230,7 +239,9 @@
       cursor: default;
     }
 
-    /* RIGHT COLUMN (Simulation) */
+    /**********************************
+     * RIGHT COLUMN (Row 2, Col 3) - Simulation area
+     **********************************/
     .simulation-col {
       grid-row: 2;
       grid-column: 3;
@@ -253,24 +264,26 @@
       background: #fff;
       border-radius: 8px;
       box-shadow: var(--shadow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: block;
+      overflow: auto; /* enables scrollbars */
       transition: transform 0.3s, background 0.3s;
-      overflow: auto; /* so the user can scroll if content is bigger than container */
     }
     .preview-window:hover {
       transform: translateY(-2px);
       background: #f8faff;
     }
-    /* The iframe is bigger than the container, forcing scrollbars if needed */
+    /* Scale the embedded app inside the iframe */
     .preview-window iframe {
-      width: 1200px;
-      height: 900px;
+      width: 1200px;  /* "Natural" width of your app */
+      height: 900px;  /* "Natural" height of your app */
       border: none;
+      transform: scale(0.75); /* Scale down to 75% */
+      transform-origin: top left;
     }
 
-    /* STEPS Block Controls */
+    /**********************************
+     * STEPS Block Controls
+     **********************************/
     .interactive-block {
       display: flex;
       align-items: center;
@@ -343,10 +356,9 @@
       <button id="refresh">REFRESH</button>
     </div>
   </div>
-
   <!-- LEFT COLUMN -->
   <div class="left-col">
-    <!-- 9 puzzle blocks -->
+    <!-- Blocks Container: Nine Puzzle Blocks -->
     <div class="blocks-container">
       <div class="block start" draggable="true">START</div>
       <div class="block stop" draggable="true">STOP</div>
@@ -365,8 +377,7 @@
         </div>
       </div>
     </div>
-
-    <!-- Camera View and CODE button -->
+    <!-- Camera Section: Camera View and CODE Button -->
     <div class="camera-section">
       <div class="block-title">Camera View</div>
       <div class="camera-box" id="cameraArea"></div>
@@ -375,38 +386,29 @@
       </button>
     </div>
   </div>
-
-  <!-- CENTER COLUMN (Drag & Drop) -->
+  <!-- CENTER COLUMN: Drag & Drop Area -->
   <div class="center-col">
     <div class="drag-title">Drag And Drop</div>
     <div class="workspace-area" id="dragArea">
       <!-- Dropped blocks appear here -->
     </div>
   </div>
-
-  <!-- RIGHT COLUMN (Simulation) -->
+  <!-- RIGHT COLUMN: Simulation Area -->
   <div class="simulation-col">
     <div class="panel-title">SIMULATION</div>
-    <!-- The preview-window is scrollable; the iframe is bigger to allow horizontal/vertical scroll -->
     <div class="preview-window" id="simulationWindow">
-      <iframe 
-        src="https://hexapod.onrender.com/" 
-        title="Hexapod Simulation">
-      </iframe>
+      <iframe src="https://hexapod.onrender.com/" title="Hexapod Simulation"></iframe>
     </div>
   </div>
-
   <!-- Custom Context Menu -->
   <div id="context-menu">
     <ul>
       <li id="context-view">View</li>
     </ul>
   </div>
-
   <script>
-    // Right-click + drag & drop logic
+    // Right-click and drag & drop logic for blocks
     let currentBlock = null;
-
     document.querySelectorAll(".blocks-container .block").forEach((block) => {
       block.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/html", block.outerHTML);
@@ -424,11 +426,9 @@
         menu.style.display = "block";
       });
     });
-
     document.addEventListener("click", () => {
       document.getElementById("context-menu").style.display = "none";
     });
-
     document.getElementById("context-view").addEventListener("click", () => {
       const mapping = {
         "start": "start.html",
@@ -448,11 +448,9 @@
         }
       }
     });
-
+    // Drag & Drop for workspace area
     const workspace = document.getElementById("dragArea");
-    workspace.addEventListener("dragover", (e) => {
-      e.preventDefault();
-    });
+    workspace.addEventListener("dragover", (e) => { e.preventDefault(); });
     workspace.addEventListener("drop", (e) => {
       e.preventDefault();
       const data = e.dataTransfer.getData("text/html");
@@ -467,7 +465,6 @@
         }
       }
     });
-
     // STEPS block controls
     function incrementSteps(event) {
       const block = event.target.closest('.block');
