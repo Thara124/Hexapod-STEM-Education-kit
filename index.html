@@ -21,12 +21,14 @@
       --red-color: #f44336;
       --red-border: #d32f2f;
     }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
+
     /* Layout:
        Row 1 (60px): Toolbar.
        Row 2 (1fr): Main content in 3 columns:
@@ -41,6 +43,7 @@
       color: var(--text-color);
       overflow: hidden; /* no scrolling */
     }
+
     /**********************************
      * TOOLBAR (Row 1)
      **********************************/
@@ -79,6 +82,7 @@
       background: var(--hover-color);
       color: #fff;
     }
+
     /**********************************
      * LEFT COLUMN (Row 2, Col 1)
      * Using flex to space two sections:
@@ -96,11 +100,9 @@
       border-right: 1px solid #e0e0e0;
       overflow: hidden;
     }
-    /* Top section: nine blocks.
-       Increase margin-top to push the blocks further down from the toolbar.
-    */
+    /* Top section: nine blocks */
     .blocks-container {
-      margin-top: 3rem;
+      margin-top: 3rem; /* push blocks down from toolbar */
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 4px;
@@ -198,6 +200,7 @@
     .code-button span {
       margin-right: 4px;
     }
+
     /**********************************
      * CENTER COLUMN (Row 2, Col 2) - Drag & Drop area
      **********************************/
@@ -240,6 +243,7 @@
     .workspace-area .block {
       cursor: default;
     }
+
     /**********************************
      * RIGHT COLUMN (Row 2, Col 3) - Simulation area
      **********************************/
@@ -260,20 +264,27 @@
       margin-bottom: 0.8rem;
       text-align: center;
     }
+    /* We allow overflow here so the user can scroll if the iframe is larger than the container */
     .preview-window {
       flex: 1;
       background: #fff;
       border-radius: 8px;
       box-shadow: var(--shadow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: block; /* changed from flex to block so we can manage overflow better */
+      overflow: auto; /* allow horizontal/vertical scroll if content is bigger */
       transition: transform 0.3s, background 0.3s;
     }
     .preview-window:hover {
       transform: translateY(-2px);
       background: #f8faff;
     }
+    /* The iframe is set to a fixed width/height to force scrollbars if it's bigger than .preview-window */
+    .preview-window iframe {
+      width: 1200px;
+      height: 900px;
+      border: none;
+    }
+
     /**********************************
      * STEPS Block Controls
      **********************************/
@@ -308,6 +319,7 @@
       border-radius: 4px;
       font-size: 10px;
     }
+
     /* Custom Context Menu styling */
     #context-menu {
       position: absolute;
@@ -348,9 +360,10 @@
       <button id="refresh">REFRESH</button>
     </div>
   </div>
+
   <!-- LEFT COLUMN -->
   <div class="left-col">
-    <!-- Top section: nine blocks -->
+    <!-- 9 puzzle blocks -->
     <div class="blocks-container">
       <div class="block start" draggable="true">START</div>
       <div class="block stop" draggable="true">STOP</div>
@@ -369,7 +382,8 @@
         </div>
       </div>
     </div>
-    <!-- Bottom section: Camera View and CODE button -->
+
+    <!-- Camera View and CODE button -->
     <div class="camera-section">
       <div class="block-title">Camera View</div>
       <div class="camera-box" id="cameraArea"></div>
@@ -378,6 +392,7 @@
       </button>
     </div>
   </div>
+
   <!-- CENTER COLUMN (Drag & Drop) -->
   <div class="center-col">
     <div class="drag-title">Drag And Drop</div>
@@ -385,23 +400,30 @@
       <!-- Dropped blocks appear here -->
     </div>
   </div>
+
   <!-- RIGHT COLUMN (Simulation) -->
   <div class="simulation-col">
     <div class="panel-title">SIMULATION</div>
+    <!-- The preview-window is scrollable, the iframe is bigger to force scrollbars -->
     <div class="preview-window" id="simulationWindow">
-      <iframe src="https://hexapod.onrender.com/" style="width:100%; height:100%; border:none;" title="Hexapod Simulation"></iframe>
+      <iframe 
+        src="https://hexapod.onrender.com/" 
+        title="Hexapod Simulation">
+      </iframe>
     </div>
   </div>
+
   <!-- Custom Context Menu -->
   <div id="context-menu">
     <ul>
       <li id="context-view">View</li>
     </ul>
   </div>
+
   <script>
-    // Variable to store the currently right-clicked block
+    // Right-click + drag & drop logic
     let currentBlock = null;
-    // Attach dragstart and contextmenu events for all blocks in the blocks-container
+
     document.querySelectorAll(".blocks-container .block").forEach((block) => {
       block.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/html", block.outerHTML);
@@ -410,7 +432,6 @@
       block.addEventListener("dragend", () => {
         block.classList.remove("dragging");
       });
-      // Right-click event to show custom context menu
       block.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         currentBlock = block;
@@ -420,11 +441,11 @@
         menu.style.display = "block";
       });
     });
-    // Hide context menu when clicking anywhere else
+
     document.addEventListener("click", () => {
       document.getElementById("context-menu").style.display = "none";
     });
-    // When "View" is clicked, redirect to the individual page based on block type
+
     document.getElementById("context-view").addEventListener("click", () => {
       const mapping = {
         "start": "start.html",
@@ -444,7 +465,7 @@
         }
       }
     });
-    // Drag & drop for workspace area
+
     const workspace = document.getElementById("dragArea");
     workspace.addEventListener("dragover", (e) => {
       e.preventDefault();
@@ -463,6 +484,7 @@
         }
       }
     });
+
     // STEPS block controls
     function incrementSteps(event) {
       const block = event.target.closest('.block');
