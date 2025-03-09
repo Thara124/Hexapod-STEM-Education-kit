@@ -84,9 +84,6 @@
 
     /**********************************
      * LEFT COLUMN (Row 2, Col 1)
-     * Contains two sections:
-     * - .blocks-container: the 9 draggable blocks (pushed down a bit)
-     * - .camera-section: Camera View title, camera box, and CODE button.
      **********************************/
     .left-col {
       grid-row: 2;
@@ -265,19 +262,19 @@
       border-radius: 8px;
       box-shadow: var(--shadow);
       display: block;
-      overflow: auto; /* enables scrollbars */
+      overflow: auto;
       transition: transform 0.3s, background 0.3s;
     }
     .preview-window:hover {
       transform: translateY(-2px);
       background: #f8faff;
     }
-    /* Scale the embedded app inside the iframe */
+    /* Scale the embedded app horizontally (only width is scaled) */
     .preview-window iframe {
-      width: 1200px;  /* "Natural" width of your app */
-      height: 900px;  /* "Natural" height of your app */
+      width: 1200px;  /* Natural width */
+      height: 900px;  /* Keep the natural height */
       border: none;
-      transform: scale(0.75); /* Scale down to 75% */
+      transform: scale(0.75, 1); /* 75% horizontal scale, vertical unchanged */
       transform-origin: top left;
     }
 
@@ -356,6 +353,7 @@
       <button id="refresh">REFRESH</button>
     </div>
   </div>
+
   <!-- LEFT COLUMN -->
   <div class="left-col">
     <!-- Blocks Container: Nine Puzzle Blocks -->
@@ -386,6 +384,7 @@
       </button>
     </div>
   </div>
+
   <!-- CENTER COLUMN: Drag & Drop Area -->
   <div class="center-col">
     <div class="drag-title">Drag And Drop</div>
@@ -393,6 +392,7 @@
       <!-- Dropped blocks appear here -->
     </div>
   </div>
+
   <!-- RIGHT COLUMN: Simulation Area -->
   <div class="simulation-col">
     <div class="panel-title">SIMULATION</div>
@@ -400,12 +400,14 @@
       <iframe src="https://hexapod.onrender.com/" title="Hexapod Simulation"></iframe>
     </div>
   </div>
+
   <!-- Custom Context Menu -->
   <div id="context-menu">
     <ul>
       <li id="context-view">View</li>
     </ul>
   </div>
+
   <script>
     // Right-click and drag & drop logic for blocks
     let currentBlock = null;
