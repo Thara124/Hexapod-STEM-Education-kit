@@ -29,24 +29,21 @@
       font-family: 'Poppins', sans-serif;
     }
 
-    /* Layout:
-       Row 1 (60px): Toolbar.
-       Row 2 (1fr): Main content in 3 columns:
-         Left (400px), Drag & Drop (1fr) and Simulation (1fr)
+    /* 
+       UPDATED: 
+       - Originally: grid-template-columns: 400px 1fr 1fr;
+       - Now:        grid-template-columns: 400px 0.6667fr 1.3333fr;
     */
     body {
       display: grid;
       grid-template-rows: 60px 1fr;
-      grid-template-columns: 400px 1fr 1fr;
+      grid-template-columns: 400px 0.6667fr 1.3333fr; /* Adjusted ratio */
       height: 100vh;
       background-color: var(--workspace-bg);
       color: var(--text-color);
       overflow: hidden; /* no scrolling */
     }
 
-    /**********************************
-     * TOOLBAR (Row 1)
-     **********************************/
     .toolbar {
       grid-column: 1 / -1;
       grid-row: 1;
@@ -83,12 +80,7 @@
       color: #fff;
     }
 
-    /**********************************
-     * LEFT COLUMN (Row 2, Col 1)
-     * Using flex to space two sections:
-     * - .blocks-container (top): contains the 9 blocks
-     * - .camera-section (bottom): contains Camera View title, Camera Box and CODE button
-     **********************************/
+    /* LEFT COLUMN */
     .left-col {
       grid-row: 2;
       grid-column: 1;
@@ -100,14 +92,12 @@
       border-right: 1px solid #e0e0e0;
       overflow: hidden;
     }
-    /* Top section: nine blocks */
     .blocks-container {
-      margin-top: 3rem; /* push blocks down from toolbar */
+      margin-top: 3rem;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 4px;
     }
-    /* Puzzle block style */
     .block {
       position: relative;
       width: 150px;
@@ -147,7 +137,6 @@
       border-radius: 50%;
       box-shadow: 0 0 0 8px inherit;
     }
-    /* Bottom section: Camera View and CODE button */
     .camera-section {
       display: flex;
       flex-direction: column;
@@ -163,7 +152,6 @@
       color: var(--accent-color);
       text-align: center;
     }
-    /* Camera Box with strict 16:9 ratio */
     .camera-box {
       width: 100%;
       max-width: 380px;
@@ -201,9 +189,7 @@
       margin-right: 4px;
     }
 
-    /**********************************
-     * CENTER COLUMN (Row 2, Col 2) - Drag & Drop area
-     **********************************/
+    /* CENTER COLUMN */
     .center-col {
       grid-row: 2;
       grid-column: 2;
@@ -244,9 +230,7 @@
       cursor: default;
     }
 
-    /**********************************
-     * RIGHT COLUMN (Row 2, Col 3) - Simulation area
-     **********************************/
+    /* RIGHT COLUMN (Simulation) */
     .simulation-col {
       grid-row: 2;
       grid-column: 3;
@@ -264,30 +248,29 @@
       margin-bottom: 0.8rem;
       text-align: center;
     }
-    /* We allow overflow here so the user can scroll if the iframe is larger than the container */
     .preview-window {
       flex: 1;
       background: #fff;
       border-radius: 8px;
       box-shadow: var(--shadow);
-      display: block; /* changed from flex to block so we can manage overflow better */
-      overflow: auto; /* allow horizontal/vertical scroll if content is bigger */
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: transform 0.3s, background 0.3s;
+      overflow: auto; /* so the user can scroll if content is bigger than container */
     }
     .preview-window:hover {
       transform: translateY(-2px);
       background: #f8faff;
     }
-    /* The iframe is set to a fixed width/height to force scrollbars if it's bigger than .preview-window */
+    /* The iframe is bigger than the container, forcing scrollbars if needed */
     .preview-window iframe {
       width: 1200px;
       height: 900px;
       border: none;
     }
 
-    /**********************************
-     * STEPS Block Controls
-     **********************************/
+    /* STEPS Block Controls */
     .interactive-block {
       display: flex;
       align-items: center;
@@ -404,7 +387,7 @@
   <!-- RIGHT COLUMN (Simulation) -->
   <div class="simulation-col">
     <div class="panel-title">SIMULATION</div>
-    <!-- The preview-window is scrollable, the iframe is bigger to force scrollbars -->
+    <!-- The preview-window is scrollable; the iframe is bigger to allow horizontal/vertical scroll -->
     <div class="preview-window" id="simulationWindow">
       <iframe 
         src="https://hexapod.onrender.com/" 
