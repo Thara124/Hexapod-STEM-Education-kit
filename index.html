@@ -262,19 +262,19 @@
       border-radius: 8px;
       box-shadow: var(--shadow);
       display: block;
-      overflow: auto;
+      overflow: auto; /* enables scrollbars if needed */
       transition: transform 0.3s, background 0.3s;
     }
     .preview-window:hover {
       transform: translateY(-2px);
       background: #f8faff;
     }
-    /* Scale the embedded app horizontally (only width is scaled) */
+    /* Scale the embedded app horizontally (only width scaled to 60%) */
     .preview-window iframe {
-      width: 1200px;  /* Natural width */
-      height: 900px;  /* Keep the natural height */
+      width: 1200px;  /* Natural width of your app */
+      height: 900px;  /* Natural height remains unchanged */
       border: none;
-      transform: scale(0.75, 1); /* 75% horizontal scale, vertical unchanged */
+      transform: scale(0.60, 1); /* 60% horizontal scale, vertical unchanged */
       transform-origin: top left;
     }
 
