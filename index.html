@@ -24,13 +24,7 @@
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
-    /* Layout:
-       Row 1 (60px): Toolbar.
-       Row 2 (1fr): Main content in 3 columns:
-         Left: 400px,
-         Center (Drag & Drop): 0.6667fr,
-         Right (Simulation): 1.3333fr.
-    */
+    /* Layout: Row 1 (Toolbar), Row 2 (Main content in 3 columns) */
     body {
       display: grid;
       grid-template-rows: 60px 1fr;
@@ -80,6 +74,7 @@
     }
     /**********************************
      * LEFT COLUMN (Row 2, Col 1)
+     * Contains the blocks and camera view section
      **********************************/
     .left-col {
       grid-row: 2;
@@ -189,7 +184,7 @@
       margin-right: 4px;
     }
     /**********************************
-     * CENTER COLUMN (Row 2, Col 2) - Drag & Drop area
+     * CENTER COLUMN (Row 2, Col 2) - Drag & Drop Area
      **********************************/
     .center-col {
       grid-row: 2;
@@ -231,7 +226,7 @@
       cursor: default;
     }
     /**********************************
-     * RIGHT COLUMN (Row 2, Col 3) - Simulation area
+     * RIGHT COLUMN (Row 2, Col 3) - Simulation Area
      **********************************/
     .simulation-col {
       grid-row: 2;
@@ -264,12 +259,12 @@
       transform: translateY(-2px);
       background: #f8faff;
     }
-    /* Scale the embedded app horizontally to 60% of its natural width */
+    /* Scale the embedded app horizontally to 60% of its natural width (vertical scale unchanged) */
     .preview-window iframe {
-      width: 1200px;  /* Natural width */
+      width: 1200px;  /* Natural width of your app */
       height: 900px;  /* Natural height remains unchanged */
       border: none;
-      transform: scale(0.47, 0.47); /* 60% horizontal scale, 100% vertical */
+      transform: scale(0.60, 1);
       transform-origin: top left;
     }
     /**********************************
@@ -376,7 +371,6 @@
       </button>
     </div>
   </div>
-
   <!-- CENTER COLUMN: Drag & Drop Area -->
   <div class="center-col">
     <div class="drag-title">Drag And Drop</div>
@@ -384,7 +378,6 @@
       <!-- Dropped blocks appear here -->
     </div>
   </div>
-
   <!-- RIGHT COLUMN: Simulation Area -->
   <div class="simulation-col">
     <div class="panel-title">SIMULATION</div>
@@ -392,14 +385,12 @@
       <iframe src="https://hexapod.onrender.com/" title="Hexapod Simulation"></iframe>
     </div>
   </div>
-
   <!-- Custom Context Menu -->
   <div id="context-menu">
     <ul>
       <li id="context-view">View</li>
     </ul>
   </div>
-
   <script>
     // Right-click and drag & drop logic for blocks
     let currentBlock = null;
@@ -456,6 +447,16 @@
           newBlock.removeAttribute("draggable");
           newBlock.classList.remove("dragging");
           workspace.appendChild(newBlock);
+          // If the dropped block is a "camera-on" block, update the camera view
+          if (newBlock.classList.contains("camera-on")) {
+            // Replace the content of the cameraArea with an iframe showing your ESP32-CAM stream
+            document.getElementById("cameraArea").innerHTML = `
+              <iframe src="http://192.168.28.89/" 
+                      style="width:100%; height:100%; border:none;" 
+                      title="ESP32-CAM Stream">
+              </iframe>
+            `;
+          }
         }
       }
     });
