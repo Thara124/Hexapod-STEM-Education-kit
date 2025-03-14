@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -261,8 +261,8 @@
     }
     /* Scale the embedded app horizontally to 60% of its natural width (vertical scale unchanged) */
     .preview-window iframe {
-      width: 1200px;  /* Natural width of your app */
-      height: 900px;  /* Natural height remains unchanged */
+      width: 1200px;
+      height: 900px;
       border: none;
       transform: scale(0.60, 1);
       transform-origin: top left;
@@ -362,10 +362,12 @@
         </div>
       </div>
     </div>
-    <!-- Camera Section: Camera View and CODE Button -->
+    <!-- Camera Section: Always Display the Camera Stream -->
     <div class="camera-section">
       <div class="block-title">Camera View</div>
-      <div class="camera-box" id="cameraArea"></div>
+      <div class="camera-box" id="cameraArea">
+        <iframe src="http://192.168.28.6" style="width:100%; height:100%; border:none;" title="ESP32-CAM Stream"></iframe>
+      </div>
       <button class="code-button" onclick="window.location.href='code.html';">
         <span>▶</span>CODE
       </button>
@@ -435,7 +437,9 @@
     });
     // Drag & Drop for workspace area
     const workspace = document.getElementById("dragArea");
-    workspace.addEventListener("dragover", (e) => { e.preventDefault(); });
+    workspace.addEventListener("dragover", (e) => { 
+      e.preventDefault(); 
+    });
     workspace.addEventListener("drop", (e) => {
       e.preventDefault();
       const data = e.dataTransfer.getData("text/html");
@@ -447,16 +451,7 @@
           newBlock.removeAttribute("draggable");
           newBlock.classList.remove("dragging");
           workspace.appendChild(newBlock);
-          // If the dropped block is a "camera-on" block, update the camera view
-          if (newBlock.classList.contains("camera-on")) {
-            // Replace the content of the cameraArea with an iframe showing your ESP32-CAM stream
-            document.getElementById("cameraArea").innerHTML = `
-              
-                      style="width:100%; height:100%; border:none;" 
-                      title="ESP32-CAM Stream">
-              </iframe>
-            `;
-          }
+          // Removed the camera view update since the stream is always visible.
         }
       }
     });
