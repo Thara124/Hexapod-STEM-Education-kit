@@ -148,20 +148,21 @@
       text-align: center;
     }
     .camera-box {
-      width: 100%;
-      max-width: 380px;
-      aspect-ratio: 16 / 9;
-      background: #fff;
-      border: 2px solid #d0e2ff;
+      width: 640px;
+      height: 480px;
+      border: 2px solid #333;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.3s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
-    .camera-box:hover {
-      background: #f0f4ff;
+    .camera-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .code-button {
       width: 150px;
@@ -182,6 +183,20 @@
     }
     .code-button span {
       margin-right: 4px;
+    }
+    .refresh-button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .refresh-button:hover {
+      background-color: #0056b3;
     }
     /**********************************
      * CENTER COLUMN (Row 2, Col 2) - Drag & Drop Area
@@ -362,12 +377,13 @@
         </div>
       </div>
     </div>
-    <!-- Camera Section: Always Display the Camera Stream -->
+    <!-- Camera Section: Updated with ESP32-CAM Stream -->
     <div class="camera-section">
       <div class="block-title">Camera View</div>
       <div class="camera-box" id="cameraArea">
-         <iframe src="https://4430-2401-4900-7b81-d18b-6d7e-1abc-9d8c-9e45.ngrok-free.app" allow="camera; autoplay" style="width:100%; height:100%; border:none;" title="ESP32-CAM Stream"></iframe>
+        <img id="camStream" src="http://192.168.58.89:81/stream" alt="ESP32-CAM Stream"/>
       </div>
+      <button class="refresh-button" onclick="refreshStream()">Refresh Stream</button>
       <button class="code-button" onclick="window.location.href='code.html';">
         <span>▶</span>CODE
       </button>
@@ -451,7 +467,6 @@
           newBlock.removeAttribute("draggable");
           newBlock.classList.remove("dragging");
           workspace.appendChild(newBlock);
-          // Removed the camera view update since the stream is always visible.
         }
       }
     });
@@ -471,6 +486,10 @@
           input.value = parseInt(input.value) - 1;
         }
       }
+    }
+    // Function to refresh the ESP32-CAM stream by appending a timestamp query parameter
+    function refreshStream() {
+      document.getElementById("camStream").src = "http://192.168.58.89:81/stream?" + new Date().getTime();
     }
   </script>
 </body>
