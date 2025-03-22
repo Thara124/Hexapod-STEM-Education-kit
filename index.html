@@ -362,17 +362,11 @@
         </div>
       </div>
     </div>
-    <!-- Camera Section: Embedded ESP32-CAM Stream URL -->
+    <!-- Camera Section: Always Display the Camera Stream -->
     <div class="camera-section">
       <div class="block-title">Camera View</div>
       <div class="camera-box" id="cameraArea">
-        <!-- Replaced the iframe with an <img> element pointing to the ESP32-CAM stream -->
-        <img 
-          src="http://192.168.58.89:81/stream"
-          alt="ESP32-CAM Stream"
-          style="width:100%; height:100%; border:none;"
-          title="ESP32-CAM Stream"
-        />
+         <iframe src="https://4430-2401-4900-7b81-d18b-6d7e-1abc-9d8c-9e45.ngrok-free.app" allow="camera; autoplay" style="width:100%; height:100%; border:none;" title="ESP32-CAM Stream"></iframe>
       </div>
       <button class="code-button" onclick="window.location.href='code.html';">
         <span>▶</span>CODE
@@ -457,6 +451,7 @@
           newBlock.removeAttribute("draggable");
           newBlock.classList.remove("dragging");
           workspace.appendChild(newBlock);
+          // Removed the camera view update since the stream is always visible.
         }
       }
     });
