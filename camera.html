@@ -1,0 +1,9 @@
+<button onclick="openIDE()">Open Arduino IDE</button>
+
+<script>
+function openIDE() {
+  fetch('http://localhost:5000/open-arduino')
+    .then(res => res.text())
+    .then(alert);
+}
+</script>
