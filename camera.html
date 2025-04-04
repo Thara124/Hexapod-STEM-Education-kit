@@ -1,9 +1,16 @@
-<button onclick="openIDE()">Open Arduino IDE</button>
+<!DOCTYPE html>
+<html>
+<head><title>Launch Arduino App</title></head>
+<body>
+  <button onclick="launchApp()">Launch Arduino App</button>
 
-<script>
-function openIDE() {
-  fetch('http://localhost:5000/open-arduino')
-    .then(res => res.text())
-    .then(alert);
-}
-</script>
+  <script>
+    function launchApp() {
+      fetch('http://localhost:5001/launch')
+        .then(res => res.text())
+        .then(alert)
+        .catch(err => alert("Error: " + err));
+    }
+  </script>
+</body>
+</html>
